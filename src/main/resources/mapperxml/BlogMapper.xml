@@ -1,0 +1,81 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.cyf.cblog.mapper.BlogMapper">
+  <resultMap id="BaseResultMap" type="com.cyf.cblog.entity.Blog">
+    <!--@mbg.generated-->
+    <!--@Table blog-->
+    <id column="blog_id" jdbcType="BIGINT" property="blogId" />
+    <result column="blog_title" jdbcType="VARCHAR" property="blogTitle" />
+    <result column="blog_sub_url" jdbcType="VARCHAR" property="blogSubUrl" />
+    <result column="blog_cover_image" jdbcType="VARCHAR" property="blogCoverImage" />
+    <result column="blog_content" jdbcType="LONGVARCHAR" property="blogContent" />
+    <result column="blog_category_id" jdbcType="INTEGER" property="blogCategoryId" />
+    <result column="blog_category_name" jdbcType="VARCHAR" property="blogCategoryName" />
+    <result column="blog_tags" jdbcType="VARCHAR" property="blogTags" />
+    <result column="blog_status" jdbcType="TINYINT" property="blogStatus" />
+    <result column="blog_views" jdbcType="BIGINT" property="blogViews" />
+    <result column="enable_comment" jdbcType="TINYINT" property="enableComment" />
+    <result column="is_deleted" jdbcType="TINYINT" property="isDeleted" />
+    <result column="create_time" jdbcType="TIMESTAMP" property="createTime" />
+    <result column="update_time" jdbcType="TIMESTAMP" property="updateTime" />
+  </resultMap>
+  <sql id="Base_Column_List">
+    <!--@mbg.generated-->
+    blog_id, blog_title, blog_sub_url, blog_cover_image, blog_content, blog_category_id, 
+    blog_category_name, blog_tags, blog_status, blog_views, enable_comment, is_deleted, 
+    create_time, update_time
+  </sql>
+
+  <select id="findBlogList" parameterType="map" resultMap="BaseResultMap">
+    select
+    <include refid="Base_Column_List"/>
+    from blog
+    where is_deleted=0
+    <if test="keyword != null">
+      and (blog_title like concat("%", #{keyword}, "%") or blog_category_name like concat("%", #{keyword}, "%")
+        or blog_content like concat("%", #{keyword}, "%")
+      )
+    </if>
+    <if test="blog_status != null ">
+      and blog_status = #{blogStatus}
+    </if>
+    <if test="blogCategoryId != null">
+      and blog_category_id = #{blogCategoryId}
+    </if>
+    order by create_time desc
+    <!--用了分页助手之后，不用写分页-->
+    <!--<if test="start != null and limit != null">
+      limit #{start}, #{limit}
+    </if>-->
+  </select>
+  <select id="findBlogListSortByType" resultMap="BaseResultMap">
+    select
+    <include refid="Base_Column_List"/>
+    from blog
+    where is_deleted = 0
+    <if test="type != null and type == 0">
+      order by blog_views desc
+    </if>
+    <if test="type != null and type == 1">
+      order by blog_id desc
+    </if>
+    limit #{limit}
+  </select>
+  <select id="findBlogsListByTag" resultType="com.cyf.cblog.entity.Blog">
+    select
+    b.blog_id, b.blog_title, b.blog_sub_url, b.blog_cover_image, b.blog_content, b.blog_category_id,
+    b.blog_category_name, b.blog_tags, b.blog_status, b.blog_views, b.enable_comment, b.is_deleted,
+    b.create_time, b.update_time
+    from blog b
+    inner join blog_tag_relation bt
+    on b.blog_id = bt.blog_id
+    inner join blog_tag t
+    on bt.tag_id = t.tag_id
+    where b.is_deleted = 0
+    <if test="tagName != null">
+      and t.tag_name = #{tagName}
+    </if>
+    order by b.create_time desc
+  </select>
+
+</mapper>

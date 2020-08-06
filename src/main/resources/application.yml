@@ -1,0 +1,25 @@
+spring:
+  application:
+    name: cblog
+  #关闭thymeleaf缓存
+  thymeleaf:
+    cache: false
+  profiles:
+    active: dev
+
+server:
+  port: 8080
+
+#配置mybatis
+mybatis:
+  mapper-locations: classpath:mapperxml/*Mapper.xml
+  type-aliases-package: com.cyf.cblog.mapperxml
+  configuration:
+    map-underscore-to-camel-case: true
+
+#配置分页插件pagehelper
+pagehelper:
+  helperDialect: mysql
+  reasonable: true
+  supportMethodsArguments: true
+  params: count=countSql

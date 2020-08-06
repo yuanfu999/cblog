@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.cyf.cblog.mapper.AdminUserMapper">
+  <resultMap id="BaseResultMap" type="com.cyf.cblog.entity.AdminUser">
+    <!--@mbg.generated generated on Thu Aug 06 10:05:00 CST 2020.-->
+    <!--@Table admin_user-->
+    <id column="admin_user_id" jdbcType="INTEGER" property="adminUserId" />
+    <result column="username" jdbcType="VARCHAR" property="username" />
+    <result column="password" jdbcType="VARCHAR" property="password" />
+    <result column="nick_name" jdbcType="VARCHAR" property="nickName" />
+    <result column="locked" jdbcType="TINYINT" property="locked" />
+  </resultMap>
+  <sql id="Base_Column_List">
+    <!--@mbg.generated generated on Thu Aug 06 10:05:00 CST 2020.-->
+    admin_user_id, username, password, nick_name, locked
+  </sql>
+</mapper>
