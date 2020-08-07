@@ -4,4 +4,8 @@ import com.cyf.cblog.entity.BlogComment;
 import tk.mybatis.mapper.common.Mapper;
 
 public interface BlogCommentMapper extends Mapper<BlogComment> {
+
+    Integer updateCommentByIds(Integer[] ids);
+
+    Integer deleteCommentByIds(Integer[] ids);
 }

@@ -86,9 +86,9 @@ $('#saveButton').click(function () {
     }
     var params = $("#linkForm").serialize();
     var url = '/admin/links/save';
-    if (linkId != null && linkId > 0) {
-        url = '/admin/links/update';
-    }
+    // if (linkId != null && linkId > 0) {
+    //     url = '/admin/links/update';
+    // }
     $.ajax({
         type: 'POST',//方法类型
         url: url,

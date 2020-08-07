@@ -1,21 +1,29 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
 <mapper namespace="com.cyf.cblog.mapper.FriendLinkMapper">
-  <resultMap id="BaseResultMap" type="com.cyf.cblog.entity.FriendLink">
-    <!--@mbg.generated generated on Tue Aug 04 14:57:06 CST 2020.-->
-    <!--@Table friend_link-->
-    <id column="link_id" jdbcType="INTEGER" property="linkId" />
-    <result column="link_type" jdbcType="TINYINT" property="linkType" />
-    <result column="link_name" jdbcType="VARCHAR" property="linkName" />
-    <result column="link_url" jdbcType="VARCHAR" property="linkUrl" />
-    <result column="link_description" jdbcType="VARCHAR" property="linkDescription" />
-    <result column="link_rank" jdbcType="INTEGER" property="linkRank" />
-    <result column="is_deleted" jdbcType="TINYINT" property="isDeleted" />
-    <result column="create_time" jdbcType="TIMESTAMP" property="createTime" />
-  </resultMap>
-  <sql id="Base_Column_List">
-    <!--@mbg.generated generated on Tue Aug 04 14:57:06 CST 2020.-->
-    link_id, link_type, link_name, link_url, link_description, link_rank, is_deleted, 
-    create_time
-  </sql>
+    <resultMap id="BaseResultMap" type="com.cyf.cblog.entity.FriendLink">
+        <!--@mbg.generated generated on Tue Aug 04 14:57:06 CST 2020.-->
+        <!--@Table friend_link-->
+        <id column="link_id" jdbcType="INTEGER" property="linkId"/>
+        <result column="link_type" jdbcType="TINYINT" property="linkType"/>
+        <result column="link_name" jdbcType="VARCHAR" property="linkName"/>
+        <result column="link_url" jdbcType="VARCHAR" property="linkUrl"/>
+        <result column="link_description" jdbcType="VARCHAR" property="linkDescription"/>
+        <result column="link_rank" jdbcType="INTEGER" property="linkRank"/>
+        <result column="is_deleted" jdbcType="TINYINT" property="isDeleted"/>
+        <result column="create_time" jdbcType="TIMESTAMP" property="createTime"/>
+    </resultMap>
+    <sql id="Base_Column_List">
+        <!--@mbg.generated generated on Tue Aug 04 14:57:06 CST 2020.-->
+        link_id, link_type, link_name, link_url, link_description, link_rank, is_deleted,
+        create_time
+    </sql>
+    <update id="deleteByIds">
+        update friend_link
+        set is_deleted = 1
+        where link_id in
+        <foreach collection="array" item="item" open="(" separator="," close=")">
+            #{item}
+        </foreach>
+    </update>
 </mapper>

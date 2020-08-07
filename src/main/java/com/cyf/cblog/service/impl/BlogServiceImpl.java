@@ -1,13 +1,7 @@
 package com.cyf.cblog.service.impl;
 
-import com.cyf.cblog.entity.Blog;
-import com.cyf.cblog.entity.BlogCategory;
-import com.cyf.cblog.entity.BlogComment;
-import com.cyf.cblog.entity.BlogTag;
-import com.cyf.cblog.mapper.BlogCategoryMapper;
-import com.cyf.cblog.mapper.BlogCommentMapper;
-import com.cyf.cblog.mapper.BlogMapper;
-import com.cyf.cblog.mapper.BlogTagMapper;
+import com.cyf.cblog.entity.*;
+import com.cyf.cblog.mapper.*;
 import com.cyf.cblog.service.BlogService;
 import com.cyf.cblog.util.MarkDownUtil;
 import com.cyf.cblog.util.PageQueryUtil;
@@ -40,6 +34,9 @@ public class BlogServiceImpl implements BlogService {
 
     @Autowired
     private BlogCommentMapper blogCommentMapper;
+
+    @Autowired
+    private BlogTagRelationMapper blogTagRelationMapper;
 
     @Override
     public PageResult getBlogsForIndexPage(Integer pageNum) {
@@ -168,6 +165,157 @@ public class BlogServiceImpl implements BlogService {
         Example.Criteria criteria = example.createCriteria();
         criteria.andEqualTo("isDeleted", 0).andEqualTo("blogStatus", 1);
         return blogMapper.selectCountByExample(example);
+    }
+
+    @Override
+    public PageResult getBlogsPage(PageQueryUtil pageUtil) {
+        PageHelper.startPage(pageUtil.getPage(), pageUtil.getLimit());
+        List<Blog> blogList = blogMapper.findBlogList(pageUtil);
+        PageInfo<Blog> pageInfo = new PageInfo<>(blogList);
+        return new PageResult(pageInfo.getList(), pageInfo.getTotal(), pageInfo.getPageSize(), pageInfo.getPageNum());
+    }
+
+    @Override
+    public Blog getBlogById(Long blogId) {
+        Blog blog = blogMapper.selectByPrimaryKey(blogId);
+        return blog;
+    }
+
+    @Override
+    public String saveBlog(Blog blog) {
+        if(blog.getBlogId() == -1 || blog.getBlogId() == 0){
+            BlogCategory blogCategory = blogCategoryMapper.selectByPrimaryKey(blog.getBlogCategoryId());
+            if (blogCategory == null){
+                blog.setBlogCategoryId(0);
+                blog.setBlogCategoryName("默认分类");
+            }else{
+                blog.setBlogCategoryName(blogCategory.getCategoryName());
+                blogCategory.setCategoryRank(blogCategory.getCategoryRank() + 1);
+            }
+            String[] tagNames = blog.getBlogTags().split(",");
+            if (tagNames.length > 6){
+                return "标签数量过多";
+            }
+            if(blogMapper.insertSelective(blog) == 1){
+                blogCategoryMapper.updateByPrimaryKeySelective(blogCategory);
+                List<BlogTag> newTags = new ArrayList<>();
+                List<BlogTag> allTags = new ArrayList<>();
+                for (String tagName : tagNames){
+                    Example example = new Example(BlogTag.class);
+                    Example.Criteria criteria = example.createCriteria();
+                    criteria.andEqualTo("isDeleted", 0).andEqualTo("tagName", tagName);
+                    BlogTag blogTag = blogTagMapper.selectOneByExample(example);
+                    if (blogTag == null){
+                        BlogTag tempTag = new BlogTag();
+                        tempTag.setTagName(tagName);
+                        tempTag.setUseNum(1L);
+                        tempTag.setCreateTime(new Date());
+                        newTags.add(tempTag);
+                    }else{
+                        blogTag.setUseNum(blogTag.getUseNum() + 1);
+                        blogTagMapper.updateByPrimaryKeySelective(blogTag);
+                        allTags.add(blogTag);
+                    }
+                }
+                if(!CollectionUtils.isEmpty(newTags)){
+                    blogTagMapper.insertBlogTagList(newTags);
+                }
+                allTags.addAll(newTags);
+                List<BlogTagRelation> blogTagRelations = new ArrayList<>();
+                for(BlogTag tag : allTags){
+                    BlogTagRelation blogTagRelation = new BlogTagRelation();
+                    blogTagRelation.setBlogId(blog.getBlogId());
+                    blogTagRelation.setTagId(tag.getTagId());
+                    blogTagRelation.setCreateTime(new Date());
+                    blogTagRelations.add(blogTagRelation);
+                }
+                Boolean boo = blogTagRelationMapper.insertBlogTagRelationList(blogTagRelations) > 0;
+                if (boo){
+                    return "success";
+                }else{
+                    return "fail";
+                }
+            }
+            return "fail";
+        }else{
+            Blog blogForUpdate = blogMapper.selectByPrimaryKey(blog.getBlogId());
+            if(blogForUpdate == null){
+                return "博客不存在";
+            }
+            blogForUpdate.setBlogTitle(blog.getBlogTitle());
+            blogForUpdate.setBlogSubUrl(blog.getBlogSubUrl());
+            blogForUpdate.setBlogContent(blog.getBlogContent());
+            blogForUpdate.setBlogCoverImage(blog.getBlogCoverImage());
+            blogForUpdate.setBlogStatus(blog.getBlogStatus());
+            blogForUpdate.setEnableComment(blog.getEnableComment());
+            BlogCategory blogCategory = blogCategoryMapper.selectByPrimaryKey(blog.getBlogCategoryId());
+            if (blogCategory == null){
+                blogForUpdate.setBlogCategoryId(0);
+                blogForUpdate.setBlogCategoryName("默认分类");
+            }else{
+                blogForUpdate.setBlogCategoryId(blog.getBlogCategoryId());
+                blogForUpdate.setBlogCategoryName(blogCategory.getCategoryName());
+                blogCategory.setCategoryRank(blogCategory.getCategoryRank() + 1);
+            }
+            String[] tagNamesForUpdate = blog.getBlogTags().split(",");
+            if (tagNamesForUpdate.length > 6){
+                return "标签数量过多";
+            }
+            if(blogMapper.updateByPrimaryKeySelective(blogForUpdate) == 1) {
+                blogCategoryMapper.updateByPrimaryKeySelective(blogCategory);
+                List<BlogTag> newTagsForUpdate = new ArrayList<>();
+                List<BlogTag> allTagsForUpdate = new ArrayList<>();
+                for (String tagName : tagNamesForUpdate) {
+                    Example example = new Example(BlogTag.class);
+                    Example.Criteria criteria = example.createCriteria();
+                    criteria.andEqualTo("isDeleted", 0).andEqualTo("tagName", tagName);
+                    BlogTag blogTag = blogTagMapper.selectOneByExample(example);
+                    if (blogTag == null) {
+                        BlogTag tempTag = new BlogTag();
+                        tempTag.setTagName(tagName);
+                        tempTag.setUseNum(1L);
+                        tempTag.setCreateTime(new Date());
+                        newTagsForUpdate.add(tempTag);
+                    } else {
+                        blogTagMapper.updateByPrimaryKeySelective(blogTag);
+                        allTagsForUpdate.add(blogTag);
+                    }
+                }
+                if (!CollectionUtils.isEmpty(newTagsForUpdate)) {
+                    blogTagMapper.insertBlogTagList(newTagsForUpdate);
+                }
+                allTagsForUpdate.addAll(newTagsForUpdate);
+                blogTagRelationMapper.deleteBlogTagRelationList(allTagsForUpdate);
+                List<BlogTagRelation> blogTagRelations = new ArrayList<>();
+                for (BlogTag tag : allTagsForUpdate) {
+                    Example example = new Example(BlogTagRelation.class);
+                    Example.Criteria criteria = example.createCriteria();
+                    criteria.andEqualTo("tagId", tag.getTagId()).andEqualTo("blogId", blog.getBlogId());
+                    BlogTagRelation blogTag = blogTagRelationMapper.selectOneByExample(example);
+                    if (blogTag != null){
+                        continue;
+                    }
+                    BlogTagRelation blogTagRelation = new BlogTagRelation();
+                    blogTagRelation.setBlogId(blog.getBlogId());
+                    blogTagRelation.setTagId(tag.getTagId());
+                    blogTagRelation.setCreateTime(new Date());
+                    blogTagRelations.add(blogTagRelation);
+                }
+                if(!CollectionUtils.isEmpty(blogTagRelations)){
+                    Integer updateTagCount = blogTagRelationMapper.insertBlogTagRelationList(blogTagRelations);
+                    if (updateTagCount <= 0){
+                        return "fail";
+                    }
+                }
+                return "success";
+            }
+            return "fail";
+        }
+    }
+
+    @Override
+    public boolean deleteBlogIds(Integer[] ids) {
+        return blogMapper.deleteBlogByIdsForLogic(ids) > 0;
     }
 }
 

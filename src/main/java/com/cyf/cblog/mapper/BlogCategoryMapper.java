@@ -9,4 +9,8 @@ import java.util.List;
 public interface BlogCategoryMapper extends Mapper<BlogCategory>{
 
     List<BlogCategory> findCategoryListByIds(@Param("categoryIds") List<Integer> categoryIds);
+
+    BlogCategory findCategoryByName(@Param("categoryName") String categoryName);
+
+    Integer deleteCategoryByIds(Integer[] ids);
 }

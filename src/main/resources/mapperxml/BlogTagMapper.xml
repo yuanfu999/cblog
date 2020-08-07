@@ -14,6 +14,14 @@
         <!--@mbg.generated-->
         tag_id, tag_name, use_num, is_deleted, create_time
     </sql>
+    <update id="deleteTagByIds">
+        update blog_tag
+        set is_deleted = 1
+        where tag_id in
+        <foreach collection="array" item="item" open="(" separator="," close=")">
+            #{item}
+        </foreach>
+    </update>
     <select id="findHotBlogTag" resultMap="BaseResultMap">
         select <include refid="Base_Column_List"/>
         from blog_tag
@@ -34,4 +42,12 @@
         </if>
 
     </select>
+    <insert id="insertBlogTagList" parameterType="list" useGeneratedKeys="true" keyProperty="tagId">
+        insert into blog_tag(tag_name, use_num, create_time)
+        values
+        <foreach collection="list" item="item" separator=",">
+            (#{item.tagName, jdbcType=VARCHAR}, #{item.useNum, jdbcType=BIGINT}, #{item.createTime,jdbcType=TIMESTAMP})
+        </foreach>
+    </insert>
+
 </mapper>

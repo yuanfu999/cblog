@@ -15,4 +15,10 @@ public interface BlogMapper extends Mapper<Blog> {
     List<Blog> findBlogListSortByType(@Param("type") int type, @Param("limit")int limit);
 
     List<Blog> findBlogsListByTag(PageQueryUtil pageQueryUtil);
+
+    //物理删除
+    Integer deleteBlogByIdsForPhysical(Integer[] ids);
+
+    //逻辑删除
+    Integer deleteBlogByIdsForLogic(Integer[] ids);
 }

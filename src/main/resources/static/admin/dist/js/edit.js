@@ -155,14 +155,14 @@ $('#saveButton').click(function () {
         return;
     }
     var url = '/admin/blogs/save';
-    var swlMessage = '保存成功';
+    var swlMessage = '发布成功';
     var data = {
-        "blogTitle": blogTitle, "blogSubUrl": blogSubUrl, "blogCategoryId": blogCategoryId,
+        "blogId": blogId,"blogTitle": blogTitle, "blogSubUrl": blogSubUrl, "blogCategoryId": blogCategoryId,
         "blogTags": blogTags, "blogContent": blogContent, "blogCoverImage": blogCoverImage, "blogStatus": blogStatus,
         "enableComment": enableComment
     };
     if (blogId > 0) {
-        url = '/admin/blogs/update';
+        url = '/admin/blogs/save';
         swlMessage = '修改成功';
         data = {
             "blogId": blogId,

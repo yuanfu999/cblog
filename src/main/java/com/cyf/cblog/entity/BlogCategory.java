@@ -1,5 +1,6 @@
 package com.cyf.cblog.entity;
 
+import com.fasterxml.jackson.annotation.JsonFormat;
 import lombok.Data;
 
 import javax.persistence.*;
@@ -52,6 +53,7 @@ public class BlogCategory {
      * 创建时间
      */
     @Column(name = "create_time")
+    @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss", timezone = "GMT+8")
     private Date createTime;
 
     public static final String COL_CATEGORY_ID = "category_id";

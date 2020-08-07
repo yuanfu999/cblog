@@ -85,9 +85,9 @@ $('#saveButton').click(function () {
         var params = $("#categoryForm").serialize();
         var url = '/admin/categories/save';
         var id = getSelectedRowWithoutAlert();
-        if (id != null) {
-            url = '/admin/categories/update';
-        }
+        // if (id != null) {
+        //     url = '/admin/categories/update';
+        // }
         $.ajax({
             type: 'POST',//方法类型
             url: url,

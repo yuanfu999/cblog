@@ -1,6 +1,7 @@
 package com.cyf.cblog.service;
 
 import com.cyf.cblog.entity.Blog;
+import com.cyf.cblog.util.PageQueryUtil;
 import com.cyf.cblog.util.PageResult;
 import com.cyf.cblog.vo.BlogDetailVO;
 import org.springframework.transaction.annotation.Transactional;
@@ -25,5 +26,15 @@ public interface BlogService {
     BlogDetailVO getBlogDetailBySubUrl(String subUrl);
 
     Integer getBlogsCount();
+
+    PageResult getBlogsPage(PageQueryUtil pageUtil);
+
+    Blog getBlogById(Long blogId);
+
+    @Transactional
+    String saveBlog(Blog blog);
+
+    @Transactional
+    boolean deleteBlogIds(Integer[] ids);
 }
 

@@ -11,6 +11,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import tk.mybatis.mapper.entity.Example;
 
+import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -52,6 +53,38 @@ public class BlogCommentServiceImpl implements BlogCommentService {
         Example.Criteria criteria = example.createCriteria();
         criteria.andEqualTo("isDeleted", 0).andEqualTo("commentStatus", 1);
         return (long)blogCommentMapper.selectCountByExample(example);
+    }
+
+    @Override
+    public PageResult getCommentsPage(PageQueryUtil pageUtil) {
+        PageHelper.startPage(pageUtil.getPage(), pageUtil.getLimit());
+        Example example = new Example(BlogComment.class);
+        Example.Criteria criteria = example.createCriteria();
+        criteria.andEqualTo("isDeleted", 0).andEqualTo("commentStatus");
+        List<BlogComment> blogComments = blogCommentMapper.selectByExample(example);
+        PageInfo<BlogComment> pageInfo = new PageInfo<>(blogComments);
+        return new PageResult(pageInfo.getList(), pageInfo.getTotal(), pageInfo.getPageSize(), pageInfo.getPageNum());
+    }
+
+    @Override
+    public Boolean checkCommentsByIds(Integer[] ids) {
+        return blogCommentMapper.updateCommentByIds(ids) > 0;
+    }
+
+    @Override
+    public Boolean reply(Long commentId, String replyBody) {
+        BlogComment blogComment = blogCommentMapper.selectByPrimaryKey(commentId);
+        if (blogComment != null && blogComment.getCommentStatus().intValue() == 1){
+            blogComment.setReplyBody(replyBody);
+            blogComment.setReplyCreateTime(new Date());
+            return blogCommentMapper.updateByPrimaryKeySelective(blogComment) > 0;
+        }
+        return false;
+    }
+
+    @Override
+    public Boolean deleteCommentByIds(Integer[] ids) {
+        return blogCommentMapper.deleteCommentByIds(ids) > 0;
     }
 }
 

@@ -24,6 +24,6 @@ public class CblogWebMvcConfigurer implements WebMvcConfigurer {
 
     @Override
     public void addResourceHandlers(ResourceHandlerRegistry registry) {
-        registry.addResourceHandler("/upload/**").addResourceLocations("file:" + Constants.FILE_UPLOAD_DIC);
+        registry.addResourceHandler("/upload/**").addResourceLocations("file:" + Constants.DEV_FILE_UPLOAD_DIC);
     }
 }

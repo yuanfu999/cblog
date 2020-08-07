@@ -1,5 +1,6 @@
 package com.cyf.cblog.entity;
 
+import com.fasterxml.jackson.annotation.JsonFormat;
 import lombok.Data;
 
 import javax.persistence.Column;
@@ -68,6 +69,7 @@ public class BlogComment {
      * 评论提交时间
      */
     @Column(name = "comment_create_time")
+    @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss", timezone = "GMT+8")
     private Date commentCreateTime;
 
     /**
@@ -86,6 +88,7 @@ public class BlogComment {
      * 回复时间
      */
     @Column(name = "reply_create_time")
+    @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss", timezone = "GMT+8")
     private Date replyCreateTime;
 
     /**
