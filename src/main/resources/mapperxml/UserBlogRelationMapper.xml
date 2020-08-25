@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.cyf.cblog.mapper.UserBlogRelationMapper">
+    <resultMap id="BaseResultMap" type="com.cyf.cblog.entity.UserBlogRelation">
+        <!--@mbg.generated generated on Mon Aug 10 09:58:49 CST 2020.-->
+        <!--@Table user_blog_relation-->
+        <id column="id" jdbcType="BIGINT" property="id"/>
+        <result column="user_id" jdbcType="INTEGER" property="userId"/>
+        <result column="blog_id" jdbcType="INTEGER" property="blogId"/>
+        <result column="create_time" jdbcType="TIMESTAMP" property="createTime"/>
+    </resultMap>
+    <sql id="Base_Column_List">
+        <!--@mbg.generated generated on Mon Aug 10 09:58:49 CST 2020.-->
+        id, user_id, blog_id, create_time
+    </sql>
+    <select id="findBlogByUserId" parameterType="int" resultType="com.cyf.cblog.entity.Blog">
+        select b.*
+        from blog b
+        inner join user_blog_relation ub
+        on b.blog_id = ub.blog_id
+        inner join admin_user u
+        on u.admin_user_id = ub.user_id
+        where is_deleted = 0
+        <if test="userId != null">
+            and u.admin_user_id = #{userId}
+        </if>
+        <if test="blogStatus != null">
+            and b.blog_status = #{blogStatus}
+        </if>
+        order by b.create_time desc
+    </select>
+</mapper>

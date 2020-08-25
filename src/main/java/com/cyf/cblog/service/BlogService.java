@@ -10,7 +10,6 @@ import java.util.List;
 
 public interface BlogService {
 
-
     PageResult getBlogsForIndexPage(Integer pageNum);
 
     List<Blog> getBlogListSortByType(Integer type);

@@ -24,7 +24,10 @@ public class FriendLinkServiceImpl implements FriendLinkService {
 
     @Override
     public Map<Byte, List<FriendLink>> getLinkListByPage() {
-        List<FriendLink> friendLinks = friendLinkMapper.selectAll();
+        Example example = new Example(FriendLink.class);
+        Example.Criteria criteria = example.createCriteria();
+        criteria.andEqualTo("isDeleted", 0);
+        List<FriendLink> friendLinks = friendLinkMapper.selectByExample(example);
         Map<Byte, List<FriendLink>> friendLinkGroup = null;
         if (!CollectionUtils.isEmpty(friendLinks)){
             friendLinkGroup = friendLinks.stream().collect(Collectors.groupingBy(FriendLink::getLinkType));

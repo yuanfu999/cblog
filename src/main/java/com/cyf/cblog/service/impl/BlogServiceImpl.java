@@ -44,6 +44,7 @@ public class BlogServiceImpl implements BlogService {
         params.put("page", pageNum);
         params.put("limit", 10);
         params.put("blogStatus", 1);
+        //params.put("userId", userId);
         PageQueryUtil pageQueryUtil = new PageQueryUtil(params);
         PageHelper.startPage(pageQueryUtil.getPage(), pageQueryUtil.getLimit());
         List<Blog> blogList = blogMapper.findBlogList(pageQueryUtil);
@@ -62,7 +63,7 @@ public class BlogServiceImpl implements BlogService {
     public BlogDetailVO getBlogDetailVOByBlogId(Long blogId) {
         Blog blog = blogMapper.selectByPrimaryKey(blogId);
         List<BlogTag> blogTags = blogTagMapper.findBlogTagByBlogId(blogId);
-        if(!CollectionUtils.isEmpty(blogTags)){
+        if (!CollectionUtils.isEmpty(blogTags)) {
             String tagNamesStr = blogTags.stream().map(BlogTag::getTagName).collect(Collectors.joining(","));
             blog.setBlogTags(tagNamesStr);
         }
@@ -140,16 +141,16 @@ public class BlogServiceImpl implements BlogService {
         return null;
     }
 
-    private List<BlogListVO> getBlogListVOs(List<Blog> blogList){
+    private List<BlogListVO> getBlogListVOs(List<Blog> blogList) {
         List<BlogListVO> blogListVOS = new ArrayList<>();
-        if(!CollectionUtils.isEmpty(blogList)){
+        if (!CollectionUtils.isEmpty(blogList)) {
             List<Integer> categoryIds = blogList.stream().map(Blog::getBlogCategoryId).collect(Collectors.toList());
             List<BlogCategory> categoryList = blogCategoryMapper.findCategoryListByIds(categoryIds);
             Map<Integer, String> categoryMap = new HashMap<>();
-            if(!CollectionUtils.isEmpty(categoryList)){
+            if (!CollectionUtils.isEmpty(categoryList)) {
                 categoryMap = categoryList.stream().collect(Collectors.toMap(BlogCategory::getCategoryId, BlogCategory::getCategoryIcon, (key1, key2) -> key2));
             }
-            for(Blog blog : blogList){
+            for (Blog blog : blogList) {
                 BlogListVO blogListVO = new BlogListVO();
                 BeanUtils.copyProperties(blog, blogListVO);
                 blogListVO.setBlogCategoryIcon(categoryMap.get(blog.getBlogCategoryId()));
@@ -183,46 +184,46 @@ public class BlogServiceImpl implements BlogService {
 
     @Override
     public String saveBlog(Blog blog) {
-        if(blog.getBlogId() == -1 || blog.getBlogId() == 0){
+        if (blog.getBlogId() == -1 || blog.getBlogId() == 0) {
             BlogCategory blogCategory = blogCategoryMapper.selectByPrimaryKey(blog.getBlogCategoryId());
-            if (blogCategory == null){
+            if (blogCategory == null) {
                 blog.setBlogCategoryId(0);
                 blog.setBlogCategoryName("默认分类");
-            }else{
+            } else {
                 blog.setBlogCategoryName(blogCategory.getCategoryName());
                 blogCategory.setCategoryRank(blogCategory.getCategoryRank() + 1);
             }
             String[] tagNames = blog.getBlogTags().split(",");
-            if (tagNames.length > 6){
+            if (tagNames.length > 6) {
                 return "标签数量过多";
             }
-            if(blogMapper.insertSelective(blog) == 1){
+            if (blogMapper.insertSelective(blog) == 1) {
                 blogCategoryMapper.updateByPrimaryKeySelective(blogCategory);
                 List<BlogTag> newTags = new ArrayList<>();
                 List<BlogTag> allTags = new ArrayList<>();
-                for (String tagName : tagNames){
+                for (String tagName : tagNames) {
                     Example example = new Example(BlogTag.class);
                     Example.Criteria criteria = example.createCriteria();
                     criteria.andEqualTo("isDeleted", 0).andEqualTo("tagName", tagName);
                     BlogTag blogTag = blogTagMapper.selectOneByExample(example);
-                    if (blogTag == null){
+                    if (blogTag == null) {
                         BlogTag tempTag = new BlogTag();
                         tempTag.setTagName(tagName);
                         tempTag.setUseNum(1L);
                         tempTag.setCreateTime(new Date());
                         newTags.add(tempTag);
-                    }else{
+                    } else {
                         blogTag.setUseNum(blogTag.getUseNum() + 1);
                         blogTagMapper.updateByPrimaryKeySelective(blogTag);
                         allTags.add(blogTag);
                     }
                 }
-                if(!CollectionUtils.isEmpty(newTags)){
+                if (!CollectionUtils.isEmpty(newTags)) {
                     blogTagMapper.insertBlogTagList(newTags);
                 }
                 allTags.addAll(newTags);
                 List<BlogTagRelation> blogTagRelations = new ArrayList<>();
-                for(BlogTag tag : allTags){
+                for (BlogTag tag : allTags) {
                     BlogTagRelation blogTagRelation = new BlogTagRelation();
                     blogTagRelation.setBlogId(blog.getBlogId());
                     blogTagRelation.setTagId(tag.getTagId());
@@ -230,16 +231,16 @@ public class BlogServiceImpl implements BlogService {
                     blogTagRelations.add(blogTagRelation);
                 }
                 Boolean boo = blogTagRelationMapper.insertBlogTagRelationList(blogTagRelations) > 0;
-                if (boo){
+                if (boo) {
                     return "success";
-                }else{
+                } else {
                     return "fail";
                 }
             }
             return "fail";
-        }else{
+        } else {
             Blog blogForUpdate = blogMapper.selectByPrimaryKey(blog.getBlogId());
-            if(blogForUpdate == null){
+            if (blogForUpdate == null) {
                 return "博客不存在";
             }
             blogForUpdate.setBlogTitle(blog.getBlogTitle());
@@ -249,19 +250,19 @@ public class BlogServiceImpl implements BlogService {
             blogForUpdate.setBlogStatus(blog.getBlogStatus());
             blogForUpdate.setEnableComment(blog.getEnableComment());
             BlogCategory blogCategory = blogCategoryMapper.selectByPrimaryKey(blog.getBlogCategoryId());
-            if (blogCategory == null){
+            if (blogCategory == null) {
                 blogForUpdate.setBlogCategoryId(0);
                 blogForUpdate.setBlogCategoryName("默认分类");
-            }else{
+            } else {
                 blogForUpdate.setBlogCategoryId(blog.getBlogCategoryId());
                 blogForUpdate.setBlogCategoryName(blogCategory.getCategoryName());
                 blogCategory.setCategoryRank(blogCategory.getCategoryRank() + 1);
             }
             String[] tagNamesForUpdate = blog.getBlogTags().split(",");
-            if (tagNamesForUpdate.length > 6){
+            if (tagNamesForUpdate.length > 6) {
                 return "标签数量过多";
             }
-            if(blogMapper.updateByPrimaryKeySelective(blogForUpdate) == 1) {
+            if (blogMapper.updateByPrimaryKeySelective(blogForUpdate) == 1) {
                 blogCategoryMapper.updateByPrimaryKeySelective(blogCategory);
                 List<BlogTag> newTagsForUpdate = new ArrayList<>();
                 List<BlogTag> allTagsForUpdate = new ArrayList<>();
@@ -292,7 +293,7 @@ public class BlogServiceImpl implements BlogService {
                     Example.Criteria criteria = example.createCriteria();
                     criteria.andEqualTo("tagId", tag.getTagId()).andEqualTo("blogId", blog.getBlogId());
                     BlogTagRelation blogTag = blogTagRelationMapper.selectOneByExample(example);
-                    if (blogTag != null){
+                    if (blogTag != null) {
                         continue;
                     }
                     BlogTagRelation blogTagRelation = new BlogTagRelation();
@@ -301,9 +302,9 @@ public class BlogServiceImpl implements BlogService {
                     blogTagRelation.setCreateTime(new Date());
                     blogTagRelations.add(blogTagRelation);
                 }
-                if(!CollectionUtils.isEmpty(blogTagRelations)){
+                if (!CollectionUtils.isEmpty(blogTagRelations)) {
                     Integer updateTagCount = blogTagRelationMapper.insertBlogTagRelationList(blogTagRelations);
-                    if (updateTagCount <= 0){
+                    if (updateTagCount <= 0) {
                         return "fail";
                     }
                 }
@@ -312,6 +313,7 @@ public class BlogServiceImpl implements BlogService {
             return "fail";
         }
     }
+
 
     @Override
     public boolean deleteBlogIds(Integer[] ids) {

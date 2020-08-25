@@ -10,6 +10,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 
 import javax.servlet.http.HttpServletRequest;
@@ -38,8 +39,9 @@ public class indexController {
      * @return
      */
     @GetMapping({"/", "index", "index.html"})
-    public String index(HttpServletRequest request){
-        return this.page(request, 1);
+    public String index(HttpServletRequest request,
+                        @RequestParam("userId") Integer userId){
+        return this.page(request, userId,1);
     }
 
     /**
@@ -48,7 +50,9 @@ public class indexController {
      */
     @GetMapping({"/page/{pageNum}"})
     @ResponseBody
-    public String page(HttpServletRequest request, @PathVariable("pageNum") int pageNum) {
+    public String page(HttpServletRequest request,
+                       @RequestParam("userId") Integer userId,
+                       @PathVariable("pageNum") Integer pageNum) {
         PageResult blogPageResult = blogService.getBlogsForIndexPage(pageNum);
         if (blogPageResult == null) {
             return "error/error_404";

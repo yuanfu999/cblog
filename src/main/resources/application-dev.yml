@@ -17,3 +17,8 @@ spring:
       max-lifetime: 30000
       connection-timeout: 30000
       connection-test-query: SELECT 1
+
+#配置日志级别
+logging:
+  level:
+    root: info
